@@ -83,6 +83,7 @@ async function getPage(page: number, retries = 2): Promise<Package[]> {
 
 const packageRequests = await Promise.allSettled(
 	Array.from({ length: requestAmount }).map(async (_, i) => {
+		await new Promise(ok => setTimeout(ok, 300 * i));
 		const packages = await getPage(i);
 		completed++;
 		if (progress) {
