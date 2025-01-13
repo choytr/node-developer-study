@@ -81,27 +81,17 @@ async function getPage(page: number, retries = 2): Promise<Package[]> {
 	}
 }
 
-const packageRequests = await Promise.allSettled(
-	Array.from({ length: requestAmount }).map(async (_, i) => {
-		await new Promise(ok => setTimeout(ok, 300 * i));
-		const packages = await getPage(i);
-		completed++;
-		if (progress) {
-			progress.render(completed);
-		} else {
-			console.log(`Completed ${completed} of ${requestAmount} requests.`);
-		}
-		return ({ page: i, packages });
-	}),
-);
-
-const packages: Package[] = packageRequests.flatMap((req, i) => {
-	if (req.status === "rejected") {
-		console.error(`Failed to fetch page ${i}: ${req.reason}.`);
-		Deno.exit(1);
+const packages: Package[] = [];
+for (let i = 0; i < requestAmount; i++) {
+	const packages = await getPage(i);
+	completed++;
+	if (progress) {
+		progress.render(completed);
+	} else {
+		console.log(`Completed ${completed} of ${requestAmount} requests.`);
 	}
-	return req.value.packages;
-});
+	packages.push(...packages);
+}
 
 if (packages.length !== 10000) {
 	const remaining = 10000 - packages.length;
