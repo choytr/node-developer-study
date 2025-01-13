@@ -65,12 +65,19 @@ const fetchSchema = z.object({
 
 type Package = z.infer<typeof packageSchema>;
 
-async function getPage(page: number): Promise<Package[]> {
-	const request = await fetch(pageURL(page));
-
-	const { objects } = fetchSchema.parse(await request.json());
-
-	return objects.map((obj) => obj.package);
+async function getPage(page: number, retries = 2): Promise<Package[]> {
+	if (retries === 0) {
+		throw new Error('retries over');
+	}
+	try {
+		const request = await fetch(pageURL(page));
+	
+		const { objects } = fetchSchema.parse(await request.json());
+	
+		return objects.map((obj) => obj.package);
+	} catch (err) {
+		return getPage(page, retries - 1);
+	}
 }
 
 const packageRequests = await Promise.allSettled(
