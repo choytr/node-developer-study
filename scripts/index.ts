@@ -37,33 +37,11 @@ function pageURL(page: number) {
 	return buildURL(page * 250);
 }
 
-const packageSchema = z.object({
-	name: z.string(),
-	version: z.string(),
-	description: z.string().optional(),
-	keywords: z.array(z.string()).optional(),
-	publisher: z.object({
-		username: z.string(),
-		email: z.string(),
-	}),
-	maintainers: z.array(z.object({
-		username: z.string(),
-		email: z.string(),
-	})).optional(),
-	links: z.object({
-		npm: z.string(),
-		homepage: z.string().optional(),
-		repository: z.string().optional(),
-	}),
-});
-
 const fetchSchema = z.object({
 	objects: z.array(z.object({
 		package: packageSchema,
 	})),
 });
-
-type Package = z.infer<typeof packageSchema>;
 
 async function getPage(page: number, retries = 2): Promise<Package[]> {
 	if (retries === 0) {
@@ -72,7 +50,7 @@ async function getPage(page: number, retries = 2): Promise<Package[]> {
 	try {
 		const request = await fetch(pageURL(page));
 	
-		const { objects } = fetchSchema.parse(await request.json());
+		const { objects } = await request.json();
 	
 		return objects.map((obj) => obj.package);
 	} catch (err) {
