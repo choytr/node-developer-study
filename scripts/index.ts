@@ -37,12 +37,6 @@ function pageURL(page: number) {
 	return buildURL(page * 250);
 }
 
-const fetchSchema = z.object({
-	objects: z.array(z.object({
-		package: packageSchema,
-	})),
-});
-
 async function getPage(page: number, retries = 2): Promise<Package[]> {
 	if (retries === 0) {
 		throw new Error('retries over');
@@ -80,7 +74,7 @@ if (packages.length !== 10000) {
 
 	const request = await fetch(fetchURL);
 
-	const { objects } = fetchSchema.parse(await request.json());
+	const { objects } = await request.json();
 
 	packages.push(...objects.map((obj) => obj.package));
 
