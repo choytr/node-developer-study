@@ -76,6 +76,7 @@ async function getPage(page: number, retries = 2): Promise<Package[]> {
 	
 		return objects.map((obj) => obj.package);
 	} catch (err) {
+		console.log('retry', err);
 		return getPage(page, retries - 1);
 	}
 }
